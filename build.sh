@@ -5,8 +5,11 @@
 #
 # For Linux, also builds musl for truly static linking.
 
-coreutils_version="8.28"
-musl_version="1.1.15"
+ADVCPMV_VERSION=${1:-0.9}
+CORE_UTILS_VERSION=${2:-9.5}
+coreutils_version=$CORE_UTILS_VERSION
+#coreutils_version="9.5"
+musl_version="1.2.5"
 
 platform=$(uname -s)
 
@@ -53,6 +56,11 @@ fi
 echo "= building coreutils"
 
 pushd coreutils-${coreutils_version}
+
+echo "= patching coreutils"
+curl -LO https://raw.githubusercontent.com/jarun/advcpmv/master/advcpmv-$ADVCPMV_VERSION-$CORE_UTILS_VERSION.patch
+patch -p1 -i advcpmv-$ADVCPMV_VERSION-$CORE_UTILS_VERSION.patch
+
 env FORCE_UNSAFE_CONFIGURE=1 CFLAGS="$CFLAGS -Os -ffunction-sections -fdata-sections" LDFLAGS='-Wl,--gc-sections' ./configure
 make
 popd # coreutils-${coreutils_version}
